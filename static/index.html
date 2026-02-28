@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Village Square</title>
+  <!-- Placeholder favicon to suppress 404 in server logs -->
+  <link rel="icon" href="data:,">
+
+  <!-- ===== STYLES =====
+       Minimal, mobile-first CSS. Everything is inline so the page
+       works as a single file with no build step. -->
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+      background: #f5f5f0;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    /* ---- Header ---- */
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2rem);
+      color: #2d6a4f;
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+
+    /* ---- Form ---- */
+    .form-group {
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: #444;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2d6a4f;
+      box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.15);
+    }
+
+    /* Per-field error message */
+    .field-error {
+      font-size: 0.78rem;
+      color: #d32f2f;
+      margin-top: 0.25rem;
+      min-height: 1.1em;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: #2d6a4f;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #1b4332;
+    }
+
+    /* ---- Success message ---- */
+    .success {
+      display: none;            /* shown via JS */
+      margin-top: 1.5rem;
+      padding: 0.75rem 1rem;
+      background: #d4edda;
+      color: #155724;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- ===== HEADER =====
+         App title and one-line description. -->
+    <header>
+      <h1>Village Square</h1>
+      <p class="subtitle">Connecting villagers with trusted local suppliers.</p>
+    </header>
+
+    <!-- ===== FORM =====
+         Name + Email login. action/method set for graceful degradation
+         if JavaScript is disabled; JS intercepts submit for now. -->
+    <form id="loginForm" action="/api/register" method="POST" novalidate>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Your name"
+               autocomplete="name" required>
+        <div class="field-error" id="nameError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com"
+               autocomplete="email" required>
+        <div class="field-error" id="emailError"></div>
+      </div>
+
+      <button type="submit">Continue</button>
+    </form>
+
+    <!-- ===== SUCCESS MESSAGE =====
+         Shown after valid submission. aria-live so screen readers
+         announce it automatically. -->
+    <div class="success" id="successMsg" aria-live="polite"></div>
+
+  </div>
+
+  <!-- ===== SCRIPT =====
+       Client-side validation + console logging.
+       Replace console.log with fetch('/api/register', ...) later. -->
+  <script>
+    (function () {
+      var form       = document.getElementById('loginForm');
+      var nameInput  = document.getElementById('name');
+      var emailInput = document.getElementById('email');
+      var nameError  = document.getElementById('nameError');
+      var emailError = document.getElementById('emailError');
+      var successMsg = document.getElementById('successMsg');
+
+      // Simple email pattern — intentionally not over-engineered
+      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Reset state
+        nameError.textContent  = '';
+        emailError.textContent = '';
+        successMsg.style.display = 'none';
+
+        var name  = nameInput.value.trim();
+        var email = emailInput.value.trim();
+        var valid = true;
+
+        // -- Validate name --
+        if (!name) {
+          nameError.textContent = 'Please enter your name.';
+          valid = false;
+        }
+
+        // -- Validate email --
+        if (!email) {
+          emailError.textContent = 'Please enter your email.';
+          valid = false;
+        } else if (!emailRegex.test(email)) {
+          emailError.textContent = 'Please enter a valid email address.';
+          valid = false;
+        }
+
+        if (!valid) return;
+
+        // -- Success: log & show message --
+        console.log('Name:', name);
+        console.log('Email:', email);
+
+        successMsg.textContent   = 'Welcome, ' + name + '!';
+        successMsg.style.display = 'block';
+      });
+    })();
+  </script>
+</body>
+</html>
