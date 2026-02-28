@@ -12,16 +12,18 @@ var ErrNotFound = errors.New("not found")
 
 // Post represents a row in the posts table.
 type Post struct {
-	ID         int64     `json:"id"`
-	UserID     int64     `json:"user_id"`
-	Author     string    `json:"author"` // populated from JOIN, not stored in posts table
-	Type       string    `json:"type"`   // offer | request | announcement
-	Title      string    `json:"title"`
-	Body       string    `json:"body"`
-	Category   string    `json:"category"`
-	EventID    *int64    `json:"event_id"`    // nullable FK to events
-	EventTitle *string   `json:"event_title"` // populated from LEFT JOIN to events
-	CreatedAt  time.Time `json:"created_at"`
+	ID             int64     `json:"id"`
+	UserID         int64     `json:"user_id"`
+	Author         string    `json:"author"` // populated from JOIN, not stored in posts table
+	Type           string    `json:"type"`   // offer | request | announcement
+	Title          string    `json:"title"`
+	Body           string    `json:"body"`
+	Category       string    `json:"category"`
+	EventID        *int64    `json:"event_id"`    // nullable FK to events
+	EventTitle     *string   `json:"event_title"` // populated from LEFT JOIN to events
+	CreatedAt      time.Time `json:"created_at"`
+	InterestCount  int       `json:"interest_count"`
+	UserInterested bool      `json:"user_interested"`
 }
 
 // CreatePost inserts a new post and returns it with the author name populated.
@@ -39,12 +41,13 @@ func CreatePost(db *sql.DB, userID int64, postType, title, body, category string
 		return nil, err
 	}
 
-	return GetPostByID(db, id)
+	return GetPostByID(db, id, userID)
 }
 
 // GetPostByID returns a single post with the author name via JOIN.
 // Returns sql.ErrNoRows if not found.
-func GetPostByID(db *sql.DB, id int64) (*Post, error) {
+// callerUserID is used to populate UserInterested; pass 0 for unauthenticated requests.
+func GetPostByID(db *sql.DB, id int64, callerUserID int64) (*Post, error) {
 	p := &Post{}
 	err := db.QueryRow(`
 		SELECT p.id, p.user_id, u.name, p.type, p.title, p.body, p.category, p.event_id, e.title, p.created_at
@@ -56,11 +59,24 @@ func GetPostByID(db *sql.DB, id int64) (*Post, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	p.InterestCount, err = GetInterestCount(db, p.ID)
+	if err != nil {
+		return nil, err
+	}
+	if callerUserID > 0 {
+		p.UserInterested, err = HasUserInterest(db, p.ID, callerUserID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return p, nil
 }
 
 // ListPosts returns posts ordered by created_at DESC, optionally filtered by type and/or category.
-func ListPosts(db *sql.DB, postType, category string) ([]Post, error) {
+// callerUserID is used to populate UserInterested; pass 0 for unauthenticated requests.
+func ListPosts(db *sql.DB, postType, category string, callerUserID int64) ([]Post, error) {
 	query := `SELECT p.id, p.user_id, u.name, p.type, p.title, p.body, p.category, p.event_id, e.title, p.created_at
 		FROM posts p
 		JOIN users u ON u.id = p.user_id
@@ -97,7 +113,24 @@ func ListPosts(db *sql.DB, postType, category string) ([]Post, error) {
 		}
 		posts = append(posts, p)
 	}
-	return posts, rows.Err()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	for i := range posts {
+		posts[i].InterestCount, err = GetInterestCount(db, posts[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		if callerUserID > 0 {
+			posts[i].UserInterested, err = HasUserInterest(db, posts[i].ID, callerUserID)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return posts, nil
 }
 
 // DeletePost deletes a post only if it belongs to the given user.

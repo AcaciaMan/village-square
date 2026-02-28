@@ -357,9 +357,20 @@
       border-color: #c0392b;
     }
 
-    /* ---- Contact button ---- */
-    .contact-btn {
+    /* ---- Interest actions ---- */
+    .interest-actions {
       display: none;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .post-card.expanded .interest-actions {
+      display: flex;
+    }
+
+    .interest-btn {
       padding: 0.35rem 0.8rem;
       font-size: 0.82rem;
       font-weight: 600;
@@ -368,21 +379,58 @@
       border: 2px solid #2d6a4f;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 0.6rem;
+      transition: all 0.2s;
+    }
+
+    .interest-btn:hover {
+      background: #e8f5e9;
+    }
+
+    .interest-btn.interested {
+      background: #2d6a4f;
+      color: #fff;
+    }
+
+    .interest-btn.interested:hover {
+      background: #3d8b6a;
+    }
+
+    .interest-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .interest-count {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #2d6a4f;
+    }
+
+    .interest-count-label {
+      font-size: 0.82rem;
+      color: #888;
+    }
+
+    .contact-btn {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #666;
+      background: none;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
       transition: all 0.2s;
     }
 
     .contact-btn:hover {
-      background: #e8f5e9;
+      background: #f5f5f5;
+      border-color: #999;
     }
 
     .contact-btn:disabled {
       opacity: 0.6;
       cursor: default;
-    }
-
-    .post-card.expanded .contact-btn {
-      display: inline-block;
     }
 
     /* ---- Form toggle buttons ---- */
@@ -645,8 +693,18 @@
             (bodyPreview ? '<div class="post-body-preview">' + VS.escapeHTML(bodyPreview) + '</div>' : '') +
             '<div class="post-body-full">' + VS.escapeHTML(p.body || '') + '</div>' +
             (p.type !== 'announcement' && currentUserID && p.user_id !== currentUserID
-              ? '<button class="contact-btn" data-contact-id="' + p.id + '">' + (p.type === 'offer' ? "I\u2019m interested" : 'I can help!') + '</button>'
-              : '') +
+              ? '<div class="interest-actions">' +
+                  '<button class="interest-btn' + (p.user_interested ? ' interested' : '') + '" data-interest-id="' + p.id + '" data-interested="' + (p.user_interested ? 'true' : 'false') + '">' +
+                    (p.user_interested ? '\u2764 Interested' : (p.type === 'offer' ? '\uD83E\uDD0D I\u2019m interested' : '\uD83E\uDD0D I can help!')) +
+                  '</button>' +
+                  '<span class="interest-count" data-count-id="' + p.id + '">' + p.interest_count + '</span>' +
+                  '<button class="contact-btn" data-contact-id="' + p.id + '">\uD83D\uDCE7 Contact</button>' +
+                '</div>'
+              : (p.type !== 'announcement' && currentUserID && p.user_id === currentUserID && p.interest_count > 0
+                ? '<div class="interest-actions interest-actions-own">' +
+                    '<span class="interest-count-label">\u2764 <span class="interest-count" data-count-id="' + p.id + '">' + p.interest_count + '</span> interested</span>' +
+                  '</div>'
+                : '')) +
             '<div class="post-full-date">' + formatFullDate(p.created_at) + '</div>' +
             '<span class="collapse-link" tabindex="0">Collapse</span>' +
           '</div>';
@@ -709,6 +767,10 @@
         for (var i = 0; i < deleteBtns.length; i++) {
           deleteBtns[i].addEventListener('click', handleDeleteClick);
         }
+        var interestBtns = feedContainer.querySelectorAll('.interest-btn');
+        for (var i = 0; i < interestBtns.length; i++) {
+          interestBtns[i].addEventListener('click', handleInterestClick);
+        }
         var contactBtns = feedContainer.querySelectorAll('.contact-btn');
         for (var i = 0; i < contactBtns.length; i++) {
           contactBtns[i].addEventListener('click', handleContactClick);
@@ -723,6 +785,45 @@
       function collapseCard(e) {
         var card = this.closest('.post-card');
         if (card) card.classList.remove('expanded');
+      }
+
+      // ---- Interest toggle ----
+      function handleInterestClick(e) {
+        var btn = e.currentTarget;
+        var postId = btn.getAttribute('data-interest-id');
+        btn.disabled = true;
+        fetch('/api/posts/' + postId + '/interest', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}'
+        })
+        .then(function (r) {
+          if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Could not toggle interest.'); });
+          return r.json();
+        })
+        .then(function (data) {
+          btn.setAttribute('data-interested', data.interested ? 'true' : 'false');
+          if (data.interested) {
+            btn.classList.add('interested');
+            btn.textContent = '\u2764 Interested';
+          } else {
+            btn.classList.remove('interested');
+            var postType = 'offer';
+            for (var i = 0; i < currentPosts.length; i++) {
+              if (String(currentPosts[i].id) === postId) { postType = currentPosts[i].type; break; }
+            }
+            btn.textContent = postType === 'offer' ? '\uD83E\uDD0D I\u2019m interested' : '\uD83E\uDD0D I can help!';
+          }
+          var countSpan = feedContainer.querySelector('.interest-count[data-count-id="' + postId + '"]');
+          if (countSpan) countSpan.textContent = data.interest_count;
+          VS.toast(data.interested ? 'Interest registered!' : 'Interest removed.', 'success');
+          btn.disabled = false;
+        })
+        .catch(function (err) {
+          VS.toast(err.message || 'Could not toggle interest.', 'error');
+          btn.disabled = false;
+        });
       }
 
       // ---- Contact post author ----

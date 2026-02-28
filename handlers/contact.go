@@ -20,7 +20,9 @@ func GetPostContact(database *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		post, err := db.GetPostByID(database, id)
+		callerID, _ := middleware.GetUserID(r)
+
+		post, err := db.GetPostByID(database, id, callerID)
 		if err != nil {
 			writeError(w, http.StatusNotFound, "post not found")
 			return
@@ -31,7 +33,6 @@ func GetPostContact(database *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		callerID, _ := middleware.GetUserID(r)
 		if callerID == post.UserID {
 			writeError(w, http.StatusBadRequest, "cannot contact yourself")
 			return

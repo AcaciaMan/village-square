@@ -107,7 +107,14 @@ func ListPosts(database *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		posts, err := db.ListPosts(database, postType, category)
+		var callerUserID int64
+		if cookie, err := r.Cookie("session"); err == nil {
+			if uid, err := db.GetSession(database, cookie.Value); err == nil {
+				callerUserID = uid
+			}
+		}
+
+		posts, err := db.ListPosts(database, postType, category, callerUserID)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "could not list posts")
 			return
@@ -127,7 +134,14 @@ func GetPost(database *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		post, err := db.GetPostByID(database, id)
+		var callerUserID int64
+		if cookie, err := r.Cookie("session"); err == nil {
+			if uid, err := db.GetSession(database, cookie.Value); err == nil {
+				callerUserID = uid
+			}
+		}
+
+		post, err := db.GetPostByID(database, id, callerUserID)
 		if err == sql.ErrNoRows {
 			writeError(w, http.StatusNotFound, "post not found")
 			return

@@ -44,6 +44,7 @@ func main() {
 	mux.HandleFunc("GET /api/posts/{id}", handlers.GetPost(database))
 	mux.HandleFunc("DELETE /api/posts/{id}", middleware.RequireAuth(database, handlers.DeletePost(database)))
 	mux.HandleFunc("GET /api/posts/{id}/contact", middleware.RequireAuth(database, handlers.GetPostContact(database)))
+	mux.HandleFunc("POST /api/posts/{id}/interest", middleware.RequireAuth(database, handlers.ToggleInterest(database)))
 	mux.HandleFunc("POST /api/events", middleware.RequireAuth(database, handlers.CreateEvent(database)))
 	mux.HandleFunc("GET /api/events", handlers.ListEvents(database))
 	mux.HandleFunc("GET /api/events/{id}", handlers.GetEvent(database))

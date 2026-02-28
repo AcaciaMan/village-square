@@ -108,5 +108,18 @@ func migrate(db *sql.DB) error {
 		}
 	}
 
+	const interestsTable = `
+	CREATE TABLE IF NOT EXISTS interests (
+		id         INTEGER  PRIMARY KEY AUTOINCREMENT,
+		post_id    INTEGER  NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+		user_id    INTEGER  NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		UNIQUE(post_id, user_id)
+	);`
+
+	if _, err := db.Exec(interestsTable); err != nil {
+		return fmt.Errorf("create interests table: %w", err)
+	}
+
 	return nil
 }
