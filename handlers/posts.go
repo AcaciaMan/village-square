@@ -49,6 +49,7 @@ func CreatePost(database *sql.DB) http.HandlerFunc {
 		}
 
 		// Validate body.
+		req.Body = strings.TrimSpace(req.Body)
 		if len(req.Body) > 2000 {
 			writeError(w, http.StatusBadRequest, "body must be under 2000 characters")
 			return

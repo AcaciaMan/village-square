@@ -48,3 +48,12 @@ func DeleteSession(db *sql.DB, token string) error {
 	_, err := db.Exec("DELETE FROM sessions WHERE token = ?", token)
 	return err
 }
+
+// CleanExpiredSessions deletes all sessions whose expires_at is in the past.
+func CleanExpiredSessions(db *sql.DB) (int64, error) {
+	res, err := db.Exec("DELETE FROM sessions WHERE expires_at < datetime('now')")
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
+}

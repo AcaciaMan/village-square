@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"village-square/db"
 	"village-square/handlers"
@@ -47,12 +48,48 @@ func main() {
 	mux.HandleFunc("GET /api/events/{id}", handlers.GetEvent(database))
 	mux.HandleFunc("DELETE /api/events/{id}", middleware.RequireAuth(database, handlers.DeleteEvent(database)))
 
+	// Catch-all for unmatched /api/* routes — return JSON errors.
+	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Fprint(w, `{"error":"not found"}`)
+	})
+
 	// Serve everything in ./static at the root path.
 	fs := http.FileServer(http.Dir("static"))
-	mux.Handle("/", fs)
 
-	// Wrap all routes with security-header middleware.
+	// Custom handler: serve static files, or 404 page for non-existent paths.
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Let the root "/" pass through to index.html via FileServer.
+		if r.URL.Path == "/" {
+			fs.ServeHTTP(w, r)
+			return
+		}
+		// Check if the requested file exists in ./static.
+		path := "static" + r.URL.Path
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			w.WriteHeader(http.StatusNotFound)
+			http.ServeFile(w, r, "static/404.html")
+			return
+		}
+		fs.ServeHTTP(w, r)
+	})
+
+	// Start background session cleanup goroutine.
+	go func() {
+		for {
+			time.Sleep(1 * time.Hour)
+			n, err := db.CleanExpiredSessions(database)
+			if err != nil {
+				log.Printf("session cleanup error: %v", err)
+			} else if n > 0 {
+				log.Printf("cleaned %d expired sessions", n)
+			}
+		}
+	}()
+
+	// Wrap all routes with middleware (outermost → innermost).
 	addr := ":8080"
 	log.Printf("Village Square listening on http://localhost%s\n", addr)
-	log.Fatal(http.ListenAndServe(addr, middleware.SecurityHeaders(mux)))
+	log.Fatal(http.ListenAndServe(addr, middleware.Logging(middleware.SecurityHeaders(middleware.LimitBody(mux)))))
 }

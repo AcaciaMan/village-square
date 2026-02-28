@@ -43,6 +43,8 @@ func Seed(db *sql.DB) error {
 		{"Sophie Jansen", "sophie@village.nl", "sophie123"},
 		{"Kees Mulder", "kees@village.nl", "kees123"},
 		{"Anna de Vries", "anna@village.nl", "anna123"},
+		{"Dirk van Dam", "dirk@village.nl", "dirk123"},
+		{"Lotte Smit", "lotte@village.nl", "lotte123"},
 	}
 
 	posts := []seedPost{
@@ -60,6 +62,10 @@ func Seed(db *sql.DB) error {
 		{"anna@village.nl", "request", "Wanted: rhubarb", "Looking for rhubarb to make a pie for village day. Will trade for eggs!", "produce", ""},
 		{"jan@village.nl", "offer", "Old fishing rods at Village Day", "Selling 3 fishing rods and a tackle box at my garage sale. €10-€25 each.", "fish", "Jan's Garage Sale"},
 		{"anna@village.nl", "offer", "Fresh eggs at Maria's sale", "I'll have a table at Maria's garden sale with eggs and rhubarb cake!", "produce", "Maria's Garden Sale"},
+		{"dirk@village.nl", "offer", "Firewood for sale", "Split oak, seasoned for 2 years. €50 per cubic metre, delivery possible.", "services", ""},
+		{"lotte@village.nl", "request", "Looking for babysitter", "Need someone for Friday evenings, 18:00–22:00. Our kids are 4 and 7.", "services", ""},
+		{"dirk@village.nl", "announcement", "New cycling path open", "The path along the canal is finally finished! Great for morning rides.", "other", ""},
+		{"lotte@village.nl", "offer", "Homemade sourdough bread", "Baking every Saturday. Reserve by Thursday evening. €4 per loaf.", "produce", ""},
 	}
 
 	events := []seedEvent{
@@ -68,6 +74,7 @@ func Seed(db *sql.DB) error {
 		{"pieter@village.nl", "sport", "Village Football Match", "Annual match: East Village vs West Village. All skill levels welcome!", "Sports field behind the church", "2026-06-15T14:00:00Z", "2026-06-15T16:00:00Z"},
 		{"kees@village.nl", "sport", "Kids' Sack Race & Games", "Fun games for children under 12. Prizes for everyone!", "Village green", "2026-06-15T13:00:00Z", "2026-06-15T14:30:00Z"},
 		{"sophie@village.nl", "gathering", "Evening BBQ & Music", "Bring your own drinks, meat provided. Live acoustic music from 20:00.", "Community hall garden", "2026-06-15T18:00:00Z", "2026-06-15T23:00:00Z"},
+		{"lotte@village.nl", "other", "Village Day Volunteering", "Help us set up tents and tables on Friday evening! Drinks provided.", "Community hall", "2026-06-14T17:00:00Z", "2026-06-14T20:00:00Z"},
 	}
 
 	// Insert users (skip if email already exists).
@@ -174,5 +181,6 @@ func Seed(db *sql.DB) error {
 	}
 
 	fmt.Printf("Seeded %d users, %d posts, and %d events.\n", usersCreated, postsCreated, eventsCreated)
+	fmt.Println("Total: 8 users, 18 posts, 6 events.")
 	return nil
 }

@@ -48,6 +48,7 @@ func CreateEvent(database *sql.DB) http.HandlerFunc {
 		}
 
 		// Validate description.
+		req.Description = strings.TrimSpace(req.Description)
 		if len(req.Description) > 2000 {
 			writeError(w, http.StatusBadRequest, "description must be under 2000 characters")
 			return
@@ -60,6 +61,7 @@ func CreateEvent(database *sql.DB) http.HandlerFunc {
 		}
 
 		// Validate location.
+		req.Location = strings.TrimSpace(req.Location)
 		if len(req.Location) > 200 {
 			writeError(w, http.StatusBadRequest, "location must be under 200 characters")
 			return

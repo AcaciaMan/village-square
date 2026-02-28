@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — Village Square</title>
+  <link rel="stylesheet" href="/shared.css">
+  <style>
+    .not-found-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .not-found-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 3rem 2.5rem;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+    .not-found-card .emoji {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    .not-found-card h1 {
+      font-size: 1.6rem;
+      color: #333;
+      margin-bottom: 0.75rem;
+    }
+    .not-found-card p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .not-found-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .not-found-links a {
+      display: inline-block;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s, transform 0.1s;
+      min-height: 44px;
+      line-height: 1.6;
+    }
+    .not-found-links a:active {
+      transform: scale(0.97);
+    }
+    .not-found-links .primary {
+      background: #2e7d32;
+      color: #fff;
+    }
+    .not-found-links .primary:hover {
+      background: #256428;
+    }
+    .not-found-links .secondary {
+      background: #f5f5f0;
+      color: #2e7d32;
+    }
+    .not-found-links .secondary:hover {
+      background: #e8e8e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="not-found-wrapper">
+    <div class="not-found-card">
+      <div class="emoji">🏘️</div>
+      <h1>Page not found</h1>
+      <p>This page doesn't exist. Maybe it moved, or perhaps you mistyped the URL.</p>
+      <div class="not-found-links">
+        <a href="/dashboard.html" class="primary">← Back to Feed</a>
+        <a href="/index.html" class="secondary">← Back to Home</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
