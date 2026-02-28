@@ -24,6 +24,7 @@ func CreatePost(database *sql.DB) http.HandlerFunc {
 			Title    string `json:"title"`
 			Body     string `json:"body"`
 			Category string `json:"category"`
+			EventID  int64  `json:"event_id"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			writeError(w, http.StatusBadRequest, "invalid JSON")
@@ -65,7 +66,18 @@ func CreatePost(database *sql.DB) http.HandlerFunc {
 
 		userID, _ := middleware.GetUserID(r)
 
-		post, err := db.CreatePost(database, userID, req.Type, req.Title, req.Body, req.Category)
+		// Validate optional event_id.
+		var eventID *int64
+		if req.EventID != 0 {
+			_, err := db.GetEventByID(database, req.EventID)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, "event not found")
+				return
+			}
+			eventID = &req.EventID
+		}
+
+		post, err := db.CreatePost(database, userID, req.Type, req.Title, req.Body, req.Category, eventID)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "could not create post")
 			return

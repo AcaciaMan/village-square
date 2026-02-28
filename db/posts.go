@@ -12,21 +12,23 @@ var ErrNotFound = errors.New("not found")
 
 // Post represents a row in the posts table.
 type Post struct {
-	ID        int64     `json:"id"`
-	UserID    int64     `json:"user_id"`
-	Author    string    `json:"author"` // populated from JOIN, not stored in posts table
-	Type      string    `json:"type"`   // offer | request | announcement
-	Title     string    `json:"title"`
-	Body      string    `json:"body"`
-	Category  string    `json:"category"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         int64     `json:"id"`
+	UserID     int64     `json:"user_id"`
+	Author     string    `json:"author"` // populated from JOIN, not stored in posts table
+	Type       string    `json:"type"`   // offer | request | announcement
+	Title      string    `json:"title"`
+	Body       string    `json:"body"`
+	Category   string    `json:"category"`
+	EventID    *int64    `json:"event_id"`    // nullable FK to events
+	EventTitle *string   `json:"event_title"` // populated from LEFT JOIN to events
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 // CreatePost inserts a new post and returns it with the author name populated.
-func CreatePost(db *sql.DB, userID int64, postType, title, body, category string) (*Post, error) {
+func CreatePost(db *sql.DB, userID int64, postType, title, body, category string, eventID *int64) (*Post, error) {
 	res, err := db.Exec(
-		"INSERT INTO posts (user_id, type, title, body, category) VALUES (?, ?, ?, ?, ?)",
-		userID, postType, title, body, category,
+		"INSERT INTO posts (user_id, type, title, body, category, event_id) VALUES (?, ?, ?, ?, ?, ?)",
+		userID, postType, title, body, category, eventID,
 	)
 	if err != nil {
 		return nil, err
@@ -45,11 +47,12 @@ func CreatePost(db *sql.DB, userID int64, postType, title, body, category string
 func GetPostByID(db *sql.DB, id int64) (*Post, error) {
 	p := &Post{}
 	err := db.QueryRow(`
-		SELECT p.id, p.user_id, u.name, p.type, p.title, p.body, p.category, p.created_at
+		SELECT p.id, p.user_id, u.name, p.type, p.title, p.body, p.category, p.event_id, e.title, p.created_at
 		FROM posts p
 		JOIN users u ON u.id = p.user_id
+		LEFT JOIN events e ON e.id = p.event_id
 		WHERE p.id = ?`, id,
-	).Scan(&p.ID, &p.UserID, &p.Author, &p.Type, &p.Title, &p.Body, &p.Category, &p.CreatedAt)
+	).Scan(&p.ID, &p.UserID, &p.Author, &p.Type, &p.Title, &p.Body, &p.Category, &p.EventID, &p.EventTitle, &p.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +61,10 @@ func GetPostByID(db *sql.DB, id int64) (*Post, error) {
 
 // ListPosts returns posts ordered by created_at DESC, optionally filtered by type and/or category.
 func ListPosts(db *sql.DB, postType, category string) ([]Post, error) {
-	query := `SELECT p.id, p.user_id, u.name, p.type, p.title, p.body, p.category, p.created_at
+	query := `SELECT p.id, p.user_id, u.name, p.type, p.title, p.body, p.category, p.event_id, e.title, p.created_at
 		FROM posts p
-		JOIN users u ON u.id = p.user_id`
+		JOIN users u ON u.id = p.user_id
+		LEFT JOIN events e ON e.id = p.event_id`
 
 	var conditions []string
 	var args []any
@@ -88,7 +92,7 @@ func ListPosts(db *sql.DB, postType, category string) ([]Post, error) {
 	posts := []Post{}
 	for rows.Next() {
 		var p Post
-		if err := rows.Scan(&p.ID, &p.UserID, &p.Author, &p.Type, &p.Title, &p.Body, &p.Category, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Author, &p.Type, &p.Title, &p.Body, &p.Category, &p.EventID, &p.EventTitle, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		posts = append(posts, p)

@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Village Day — Village Square</title>
+  <link rel="icon" href="data:,">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+      background: #f5f5f0;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* ---- Header bar ---- */
+    .header {
+      background: #2d6a4f;
+      color: #fff;
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    .nav-link.active {
+      color: #fff;
+      background: rgba(255,255,255,0.2);
+      border-bottom: 2px solid #fff;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-user {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .logout-btn {
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2d6a4f;
+      background: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #e0e0d8;
+    }
+
+    /* ---- Banner ---- */
+    #banner {
+      display: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #banner.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    #banner.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .page-title h2 {
+      font-size: clamp(1.4rem, 4vw, 1.8rem);
+      color: #2d6a4f;
+      margin-bottom: 0.4rem;
+    }
+
+    .page-title p {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    /* ---- Top bar: filters + add button ---- */
+    .page-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ---- Filter tabs ---- */
+    .type-filters {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .type-btn {
+      padding: 0.35rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #fff;
+      color: #2d6a4f;
+      border: 2px solid #2d6a4f;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .type-btn:hover {
+      background: #e8f5e9;
+    }
+
+    .type-btn.active {
+      background: #2d6a4f;
+      color: #fff;
+    }
+
+    /* ---- Add Event button ---- */
+    .add-event-btn {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #fff;
+      background: #2d6a4f;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .add-event-btn:hover {
+      background: #235a40;
+    }
+
+    /* ---- Timeline ---- */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .timeline-section-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2d6a4f;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-section-label::before,
+    .timeline-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #ccc;
+    }
+
+    .timeline-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    /* ---- Event cards ---- */
+    .event-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      padding: 1.1rem 1.3rem;
+    }
+
+    .event-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-garage_sale { background: #fff3cd; color: #856404; }
+    .badge-sport { background: #cce5ff; color: #004085; }
+    .badge-gathering { background: #d4edda; color: #155724; }
+    .badge-other { background: #e2e3e5; color: #383d41; }
+
+    .event-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 0.3rem;
+    }
+
+    .event-time {
+      font-size: 0.88rem;
+      color: #2d6a4f;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .event-location {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 0.3rem;
+    }
+
+    .event-description {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      margin-bottom: 0.3rem;
+    }
+
+    .event-meta {
+      font-size: 0.78rem;
+      color: #999;
+      margin-top: 0.35rem;
+    }
+
+    .event-delete-btn {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #c0392b;
+      background: none;
+      border: 1.5px solid #e0bfbf;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: all 0.2s;
+    }
+
+    .event-delete-btn:hover {
+      background: #fdecea;
+      border-color: #c0392b;
+    }
+
+    /* ---- Empty state ---- */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #999;
+      font-size: 0.95rem;
+    }
+
+    /* ---- Modal overlay ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      animation: modalFadeIn 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      padding: 2rem;
+      width: 92%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: modalSlideIn 0.2s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 0.8rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #999;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .modal-card h3 {
+      font-size: 1.15rem;
+      color: #2d6a4f;
+      margin-bottom: 1.2rem;
+    }
+
+    /* ---- Form fields ---- */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 0.35rem;
+    }
+
+    .form-toggles {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .form-toggle-btn {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #fff;
+      color: #2d6a4f;
+      border: 2px solid #2d6a4f;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .form-toggle-btn:hover {
+      background: #e8f5e9;
+    }
+
+    .form-toggle-btn.active {
+      background: #2d6a4f;
+      color: #fff;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.9rem;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-input:focus {
+      border-color: #2d6a4f;
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 4.5rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .field-error {
+      font-size: 0.78rem;
+      color: #d32f2f;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    .form-submit-btn {
+      width: 100%;
+      padding: 0.65rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      background: #2d6a4f;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .form-submit-btn:hover {
+      background: #235a40;
+    }
+
+    .form-submit-btn:disabled {
+      background: #a0c4b0;
+      cursor: not-allowed;
+    }
+
+    /* ---- Mobile (≤ 500px) ---- */
+    @media (max-width: 500px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .header-right {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .page-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .add-event-btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .type-filters {
+        justify-content: center;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .modal-card {
+        padding: 1.4rem;
+        width: 100%;
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header bar -->
+  <div class="header">
+    <span class="header-title">Village Square</span>
+    <nav class="header-nav">
+      <a href="/dashboard.html" class="nav-link">Feed</a>
+      <a href="/village-day.html" class="nav-link active">Village Day</a>
+    </nav>
+    <div class="header-right">
+      <span class="header-user" id="headerUser"></span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- Banner for messages -->
+  <div id="banner" aria-live="polite"></div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="page-title">
+      <h2>Village Day</h2>
+      <p>Our annual village celebration — garage sales, sports, and evening gathering.</p>
+    </div>
+
+    <div class="page-actions">
+      <div class="type-filters">
+        <button class="type-btn active" data-type="">All</button>
+        <button class="type-btn" data-type="garage_sale">Garage Sales</button>
+        <button class="type-btn" data-type="sport">Sports</button>
+        <button class="type-btn" data-type="gathering">Gatherings</button>
+        <button class="type-btn" data-type="other">Other</button>
+      </div>
+      <button class="add-event-btn" id="addEventBtn">+ Add Event</button>
+    </div>
+
+    <div id="timelineContainer">
+      <div class="empty-state">Loading…</div>
+    </div>
+  </div>
+
+  <!-- New Event modal -->
+  <div class="modal-overlay" id="newEventModal" role="dialog" aria-modal="true" aria-label="Create a new event">
+    <div class="modal-card">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Close">×</button>
+      <h3>Create a New Event</h3>
+      <form id="newEventForm" novalidate>
+        <div class="form-group">
+          <label for="formTitle">Title</label>
+          <input type="text" id="formTitle" class="form-input" maxlength="200" placeholder="e.g., Garage sale at Housenumber 12">
+          <div class="field-error" id="errTitle"></div>
+        </div>
+        <div class="form-group">
+          <label>Event Type</label>
+          <div class="form-toggles" id="formTypeToggles">
+            <button type="button" class="form-toggle-btn" data-type="garage_sale">Garage Sale</button>
+            <button type="button" class="form-toggle-btn" data-type="sport">Sport</button>
+            <button type="button" class="form-toggle-btn" data-type="gathering">Gathering</button>
+            <button type="button" class="form-toggle-btn active" data-type="other">Other</button>
+          </div>
+          <div class="field-error" id="errType"></div>
+        </div>
+        <div class="form-group">
+          <label for="formLocation">Location <span style="font-weight:400;color:#999">(optional)</span></label>
+          <input type="text" id="formLocation" class="form-input" maxlength="200" placeholder="e.g., Housenumber 12, garden">
+          <div class="field-error" id="errLocation"></div>
+        </div>
+        <div class="form-group">
+          <label for="formDate">Date</label>
+          <input type="date" id="formDate" class="form-input">
+          <div class="field-error" id="errDate"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="formStartTime">Start Time</label>
+            <input type="time" id="formStartTime" class="form-input">
+            <div class="field-error" id="errStartTime"></div>
+          </div>
+          <div class="form-group">
+            <label for="formEndTime">End Time <span style="font-weight:400;color:#999">(optional)</span></label>
+            <input type="time" id="formEndTime" class="form-input">
+            <div class="field-error" id="errEndTime"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="formDescription">Description <span style="font-weight:400;color:#999">(optional)</span></label>
+          <textarea id="formDescription" class="form-input" rows="3" maxlength="2000" placeholder="Details about the event…"></textarea>
+          <div class="field-error" id="errDescription"></div>
+        </div>
+        <button type="submit" class="form-submit-btn" id="formSubmitBtn">Create Event</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var headerUser       = document.getElementById('headerUser');
+      var logoutBtn        = document.getElementById('logoutBtn');
+      var banner           = document.getElementById('banner');
+      var bannerTimer      = null;
+      var timelineContainer = document.getElementById('timelineContainer');
+      var addEventBtn      = document.getElementById('addEventBtn');
+      var typeBtns         = document.querySelectorAll('.type-btn');
+
+      var currentType = '';
+      var currentUserID = 0;
+
+      // ---- Modal elements ----
+      var modal           = document.getElementById('newEventModal');
+      var modalCloseBtn   = document.getElementById('modalCloseBtn');
+      var newEventForm    = document.getElementById('newEventForm');
+      var formTitle       = document.getElementById('formTitle');
+      var formLocation    = document.getElementById('formLocation');
+      var formDate        = document.getElementById('formDate');
+      var formStartTime   = document.getElementById('formStartTime');
+      var formEndTime     = document.getElementById('formEndTime');
+      var formDescription = document.getElementById('formDescription');
+      var formSubmitBtn   = document.getElementById('formSubmitBtn');
+      var formTypeToggles = document.querySelectorAll('#formTypeToggles .form-toggle-btn');
+
+      var errTitle       = document.getElementById('errTitle');
+      var errType        = document.getElementById('errType');
+      var errLocation    = document.getElementById('errLocation');
+      var errDate        = document.getElementById('errDate');
+      var errStartTime   = document.getElementById('errStartTime');
+      var errEndTime     = document.getElementById('errEndTime');
+      var errDescription = document.getElementById('errDescription');
+
+      var selectedEventType = 'other';
+
+      // ---- Banner helper ----
+      function showBanner(message, type) {
+        if (bannerTimer) clearTimeout(bannerTimer);
+        banner.textContent = message;
+        banner.className = type;
+        banner.style.display = 'block';
+        banner.style.animation = 'none';
+        void banner.offsetWidth;
+        banner.style.animation = '';
+        bannerTimer = setTimeout(function () {
+          banner.style.display = 'none';
+        }, 4000);
+      }
+
+      // ---- Escape HTML ----
+      function escHtml(str) {
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+      }
+
+      // ---- Badge class helper ----
+      function eventBadgeClass(type) {
+        if (type === 'garage_sale') return 'badge badge-garage_sale';
+        if (type === 'sport') return 'badge badge-sport';
+        if (type === 'gathering') return 'badge badge-gathering';
+        return 'badge badge-other';
+      }
+
+      function eventTypeLabel(type) {
+        if (type === 'garage_sale') return 'Garage Sale';
+        if (type === 'sport') return 'Sport';
+        if (type === 'gathering') return 'Gathering';
+        return 'Other';
+      }
+
+      // ---- Format time range ----
+      function formatTimeRange(startStr, endStr) {
+        var s = new Date(startStr);
+        var sh = String(s.getHours()).padStart(2, '0');
+        var sm = String(s.getMinutes()).padStart(2, '0');
+        if (!endStr) return sh + ':' + sm + ' onwards';
+        var e = new Date(endStr);
+        var eh = String(e.getHours()).padStart(2, '0');
+        var em = String(e.getMinutes()).padStart(2, '0');
+        return sh + ':' + sm + ' – ' + eh + ':' + em;
+      }
+
+      // ---- Get time-of-day bucket ----
+      function timeBucket(startStr) {
+        var h = new Date(startStr).getHours();
+        if (h < 12) return 'morning';
+        if (h < 17) return 'afternoon';
+        return 'evening';
+      }
+
+      var bucketLabels = {
+        morning:   '☀️ Morning',
+        afternoon: '🌤️ Afternoon',
+        evening:   '🌙 Evening'
+      };
+
+      // ---- Render single event card ----
+      function eventCardHTML(ev) {
+        var deleteBtn = '';
+        if (currentUserID && ev.user_id === currentUserID) {
+          deleteBtn = '<button class="event-delete-btn" data-delete-id="' + ev.id + '" title="Delete this event">Delete</button>';
+        }
+
+        var locationHtml = '';
+        if (ev.location) {
+          locationHtml = '<div class="event-location">📍 ' + escHtml(ev.location) + '</div>';
+        }
+
+        var descHtml = '';
+        if (ev.description) {
+          descHtml = '<div class="event-description">' + escHtml(ev.description) + '</div>';
+        }
+
+        return '<div class="event-card" data-event-id="' + ev.id + '">' +
+          '<div class="event-card-top">' +
+            '<span class="' + eventBadgeClass(ev.event_type) + '">' + escHtml(eventTypeLabel(ev.event_type)) + '</span>' +
+            deleteBtn +
+          '</div>' +
+          '<div class="event-title">' + escHtml(ev.title) + '</div>' +
+          '<div class="event-time">🕐 ' + formatTimeRange(ev.start_time, ev.end_time) + '</div>' +
+          locationHtml +
+          descHtml +
+          '<div class="event-meta">Posted by ' + escHtml(ev.author) + '</div>' +
+        '</div>';
+      }
+
+      // ---- Render timeline ----
+      function renderTimeline(events) {
+        if (!events || events.length === 0) {
+          timelineContainer.innerHTML =
+            '<div class="empty-state">No events planned yet — be the first to add one!</div>';
+          return;
+        }
+
+        // Group by time-of-day bucket
+        var groups = { morning: [], afternoon: [], evening: [] };
+        for (var i = 0; i < events.length; i++) {
+          var bucket = timeBucket(events[i].start_time);
+          groups[bucket].push(events[i]);
+        }
+
+        var order = ['morning', 'afternoon', 'evening'];
+        var html = '<div class="timeline">';
+        for (var g = 0; g < order.length; g++) {
+          var key = order[g];
+          if (groups[key].length === 0) continue;
+          html += '<div>' +
+            '<div class="timeline-section-label">' + bucketLabels[key] + '</div>' +
+            '<div class="timeline-group">';
+          for (var j = 0; j < groups[key].length; j++) {
+            html += eventCardHTML(groups[key][j]);
+          }
+          html += '</div></div>';
+        }
+        html += '</div>';
+        timelineContainer.innerHTML = html;
+        attachDeleteListeners();
+      }
+
+      // ---- Attach delete listeners ----
+      function attachDeleteListeners() {
+        var btns = timelineContainer.querySelectorAll('.event-delete-btn');
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].addEventListener('click', handleDeleteClick);
+        }
+      }
+
+      function handleDeleteClick(e) {
+        var btn = e.currentTarget;
+        var eventId = btn.getAttribute('data-delete-id');
+        if (!confirm('Delete this event?')) return;
+
+        btn.disabled = true;
+        fetch('/api/events/' + eventId, {
+          method: 'DELETE',
+          credentials: 'same-origin'
+        })
+        .then(function (r) {
+          if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Delete failed'); });
+          return r.json();
+        })
+        .then(function () {
+          var card = btn.closest('.event-card');
+          if (card) card.remove();
+          showBanner('Event deleted.', 'success');
+          // If the timeline group is now empty, re-fetch to clean up section labels
+          loadEvents();
+        })
+        .catch(function (err) {
+          showBanner(err.message || 'Could not delete event.', 'error');
+          btn.disabled = false;
+        });
+      }
+
+      // ---- Fetch events ----
+      function loadEvents() {
+        timelineContainer.innerHTML = '<div class="empty-state">Loading…</div>';
+
+        var url = '/api/events';
+        if (currentType) url += '?type=' + encodeURIComponent(currentType);
+
+        fetch(url)
+          .then(function (r) {
+            if (!r.ok) throw new Error('fetch failed');
+            return r.json();
+          })
+          .then(function (data) {
+            renderTimeline(data.events);
+          })
+          .catch(function () {
+            timelineContainer.innerHTML =
+              '<div class="empty-state">Could not load events. Please try again.</div>';
+          });
+      }
+
+      // ---- Filter: type buttons ----
+      for (var i = 0; i < typeBtns.length; i++) {
+        typeBtns[i].addEventListener('click', function () {
+          for (var j = 0; j < typeBtns.length; j++) typeBtns[j].classList.remove('active');
+          this.classList.add('active');
+          currentType = this.getAttribute('data-type');
+          loadEvents();
+        });
+      }
+
+      // ---- Modal: open / close ----
+      function openModal() {
+        newEventForm.reset();
+        formTitle.value = '';
+        formLocation.value = '';
+        formDate.value = '';
+        formStartTime.value = '';
+        formEndTime.value = '';
+        formDescription.value = '';
+        selectedEventType = 'other';
+        for (var i = 0; i < formTypeToggles.length; i++) {
+          formTypeToggles[i].classList.toggle('active', formTypeToggles[i].getAttribute('data-type') === 'other');
+        }
+        clearFieldErrors();
+        formSubmitBtn.disabled = false;
+        modal.classList.add('open');
+        formTitle.focus();
+      }
+
+      function closeModal() {
+        modal.classList.remove('open');
+        addEventBtn.focus();
+      }
+
+      function clearFieldErrors() {
+        var errs = [errTitle, errType, errLocation, errDate, errStartTime, errEndTime, errDescription];
+        for (var i = 0; i < errs.length; i++) {
+          errs[i].textContent = '';
+          errs[i].classList.remove('visible');
+        }
+      }
+
+      function showFieldError(el, msg) {
+        el.textContent = msg;
+        el.classList.add('visible');
+      }
+
+      addEventBtn.addEventListener('click', openModal);
+      modalCloseBtn.addEventListener('click', closeModal);
+
+      // Close on backdrop click
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+      });
+
+      // ---- Modal: focus trap ----
+      modal.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab') return;
+        var focusable = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+
+      // ---- Form: type toggles ----
+      for (var t = 0; t < formTypeToggles.length; t++) {
+        formTypeToggles[t].addEventListener('click', function () {
+          for (var k = 0; k < formTypeToggles.length; k++) formTypeToggles[k].classList.remove('active');
+          this.classList.add('active');
+          selectedEventType = this.getAttribute('data-type');
+        });
+      }
+
+      // ---- Form: submit ----
+      newEventForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearFieldErrors();
+
+        var valid = true;
+        var titleVal = formTitle.value.trim();
+        var locationVal = formLocation.value;
+        var dateVal = formDate.value;
+        var startVal = formStartTime.value;
+        var endVal = formEndTime.value;
+        var descVal = formDescription.value;
+
+        // Title
+        if (!titleVal) {
+          showFieldError(errTitle, 'Title is required.');
+          valid = false;
+        } else if (titleVal.length > 200) {
+          showFieldError(errTitle, 'Title must be under 200 characters.');
+          valid = false;
+        }
+
+        // Description
+        if (descVal.length > 2000) {
+          showFieldError(errDescription, 'Description must be under 2000 characters.');
+          valid = false;
+        }
+
+        // Event type
+        var validTypes = { garage_sale: true, sport: true, gathering: true, other: true };
+        if (!validTypes[selectedEventType]) {
+          showFieldError(errType, 'Please select an event type.');
+          valid = false;
+        }
+
+        // Location
+        if (locationVal.length > 200) {
+          showFieldError(errLocation, 'Location must be under 200 characters.');
+          valid = false;
+        }
+
+        // Date
+        if (!dateVal) {
+          showFieldError(errDate, 'Date is required.');
+          valid = false;
+        }
+
+        // Start time
+        if (!startVal) {
+          showFieldError(errStartTime, 'Start time is required.');
+          valid = false;
+        }
+
+        if (!valid) return;
+
+        // Build ISO strings
+        var startISO = dateVal + 'T' + startVal + ':00Z';
+        var endISO = null;
+        if (endVal) {
+          endISO = dateVal + 'T' + endVal + ':00Z';
+          // Validate end after start
+          if (new Date(endISO) <= new Date(startISO)) {
+            showFieldError(errEndTime, 'End time must be after start time.');
+            return;
+          }
+        }
+
+        formSubmitBtn.disabled = true;
+
+        var body = {
+          title: titleVal,
+          description: descVal,
+          event_type: selectedEventType,
+          location: locationVal,
+          start_time: startISO
+        };
+        if (endISO) body.end_time = endISO;
+
+        fetch('/api/events', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        })
+        .then(function (r) {
+          if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Failed to create event'); });
+          return r.json();
+        })
+        .then(function () {
+          closeModal();
+          showBanner('Event created!', 'success');
+          loadEvents();
+        })
+        .catch(function (err) {
+          showBanner(err.message || 'Could not create event.', 'error');
+          formSubmitBtn.disabled = false;
+        });
+      });
+
+      // ---- Auth guard ----
+      fetch('/api/me', { credentials: 'same-origin' })
+        .then(function (r) {
+          if (!r.ok) {
+            window.location.href = '/index.html';
+            return null;
+          }
+          return r.json();
+        })
+        .then(function (user) {
+          if (!user) return;
+          currentUserID = user.id;
+          headerUser.textContent = user.name;
+          loadEvents();
+        })
+        .catch(function () {
+          window.location.href = '/index.html';
+        });
+
+      // ---- Logout ----
+      logoutBtn.addEventListener('click', function () {
+        logoutBtn.disabled = true;
+        fetch('/api/logout', {
+          method: 'POST',
+          credentials: 'same-origin'
+        })
+        .then(function () {
+          window.location.href = '/index.html';
+        })
+        .catch(function () {
+          showBanner('Logout failed. Please try again.', 'error');
+          logoutBtn.disabled = false;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

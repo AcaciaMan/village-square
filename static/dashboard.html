@@ -40,6 +40,32 @@
       font-weight: 700;
     }
 
+    .header-nav {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    .nav-link.active {
+      color: #fff;
+      background: rgba(255,255,255,0.2);
+      border-bottom: 2px solid #fff;
+    }
+
     .header-right {
       display: flex;
       align-items: center;
@@ -267,6 +293,19 @@
       text-transform: capitalize;
     }
 
+    .event-link-badge {
+      display: inline-block;
+      margin-top: 0.3rem;
+      font-size: 0.78rem;
+      color: #2d6a4f;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .event-link-badge:hover {
+      text-decoration: underline;
+    }
+
     .post-title {
       font-size: 1rem;
       font-weight: 700;
@@ -336,6 +375,57 @@
       font-size: 0.9rem;
       color: #999;
     }
+
+    .card-link {
+      display: inline-block;
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2d6a4f;
+      text-decoration: none;
+    }
+
+    .card-link:hover {
+      text-decoration: underline;
+    }
+
+    .event-mini {
+      text-align: left;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .event-mini:last-child {
+      border-bottom: none;
+    }
+
+    .event-mini-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .event-mini-time {
+      font-size: 0.78rem;
+      color: #999;
+      margin-top: 0.15rem;
+    }
+
+    .badge-event {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-right: 0.3rem;
+    }
+
+    .badge-garage_sale { background: #fff3cd; color: #856404; }
+    .badge-sport { background: #cce5ff; color: #004085; }
+    .badge-gathering { background: #d4edda; color: #155724; }
+    .badge-other-event { background: #e2e3e5; color: #383d41; }
 
     /* ---- Post detail expanded ---- */
     .post-card.expanded .post-body-preview {
@@ -606,6 +696,10 @@
   <!-- Header bar -->
   <div class="header">
     <span class="header-title">Village Square</span>
+    <nav class="header-nav">
+      <a href="/dashboard.html" class="nav-link active">Feed</a>
+      <a href="/village-day.html" class="nav-link">Village Day</a>
+    </nav>
     <div class="header-right">
       <span class="header-user" id="headerUser"></span>
       <button class="logout-btn" id="logoutBtn">Logout</button>
@@ -652,10 +746,10 @@
         </div>
       </div>
 
-      <!-- Village Day placeholder card -->
-      <div class="card">
+      <!-- Village Day live preview card -->
+      <div class="card" id="villageDayCard">
         <h3>Village Day</h3>
-        <p>Upcoming village events and activities will be listed here.</p>
+        <p>Loading events…</p>
       </div>
     </div>
   </div>
@@ -692,6 +786,12 @@
           <div class="field-error" id="errCategory"></div>
         </div>
         <div class="form-group">
+          <label for="formEvent">Link to Village Day event <span style="font-weight:400;color:#999">(optional)</span></label>
+          <select id="formEvent" class="form-input">
+            <option value="">None</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label for="formBody">Details <span style="font-weight:400;color:#999">(optional)</span></label>
           <textarea id="formBody" class="form-input" rows="4" maxlength="2000" placeholder="Add details…"></textarea>
           <div class="field-error" id="errBody"></div>
@@ -723,6 +823,7 @@
       var formTitle      = document.getElementById('formTitle');
       var formBody       = document.getElementById('formBody');
       var formCategory   = document.getElementById('formCategory');
+      var formEvent      = document.getElementById('formEvent');
       var formSubmitBtn  = document.getElementById('formSubmitBtn');
       var formTypeToggles = document.querySelectorAll('#formTypeToggles .form-toggle-btn');
       var errType        = document.getElementById('errType');
@@ -801,6 +902,7 @@
             '</div>' +
             '<div class="post-title" tabindex="0">' + escHtml(p.title) + '</div>' +
             '<div class="post-meta">' + escHtml(p.author) + ' · ' + timeAgo(p.created_at) + '</div>' +
+            (p.event_title ? '<a class="event-link-badge" href="/village-day.html">📅 ' + escHtml(p.event_title) + '</a>' : '') +
             (bodyPreview ? '<div class="post-body-preview">' + escHtml(bodyPreview) + '</div>' : '') +
             '<div class="post-body-full">' + escHtml(p.body || '') + '</div>' +
             '<div class="post-full-date">' + formatFullDate(p.created_at) + '</div>' +
@@ -944,6 +1046,7 @@
         formTitle.value = '';
         formBody.value = '';
         formCategory.value = 'other';
+        formEvent.innerHTML = '<option value="">None</option>';
         selectedFormType = 'offer';
         for (var i = 0; i < formTypeToggles.length; i++) {
           formTypeToggles[i].classList.toggle('active', formTypeToggles[i].getAttribute('data-type') === 'offer');
@@ -952,6 +1055,20 @@
         formSubmitBtn.disabled = false;
         modal.classList.add('open');
         formTitle.focus();
+
+        // Populate event dropdown
+        fetch('/api/events')
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(data) {
+            if (!data || !data.events || data.events.length === 0) return;
+            for (var i = 0; i < data.events.length; i++) {
+              var opt = document.createElement('option');
+              opt.value = data.events[i].id;
+              opt.textContent = data.events[i].title;
+              formEvent.appendChild(opt);
+            }
+          })
+          .catch(function() { /* ignore */ });
       }
 
       function closeModal() {
@@ -1043,7 +1160,8 @@
             type: selectedFormType,
             title: titleVal,
             body: bodyVal,
-            category: formCategory.value
+            category: formCategory.value,
+            event_id: formEvent.value ? parseInt(formEvent.value, 10) : undefined
           })
         })
         .then(function (r) {
@@ -1069,6 +1187,60 @@
         });
       });
 
+      // ---- Village Day card: live preview ----
+      var villageDayCard = document.getElementById('villageDayCard');
+
+      function eventBadgeClass(t) {
+        if (t === 'garage_sale') return 'badge-event badge-garage_sale';
+        if (t === 'sport') return 'badge-event badge-sport';
+        if (t === 'gathering') return 'badge-event badge-gathering';
+        return 'badge-event badge-other-event';
+      }
+
+      function eventTypeLabel(t) {
+        if (t === 'garage_sale') return 'Garage Sale';
+        if (t === 'sport') return 'Sport';
+        if (t === 'gathering') return 'Gathering';
+        return 'Other';
+      }
+
+      function formatEventTime(start, end) {
+        var s = new Date(start);
+        var sh = String(s.getHours()).padStart(2,'0');
+        var sm = String(s.getMinutes()).padStart(2,'0');
+        if (!end) return sh + ':' + sm + ' onwards';
+        var e = new Date(end);
+        var eh = String(e.getHours()).padStart(2,'0');
+        var em = String(e.getMinutes()).padStart(2,'0');
+        return sh + ':' + sm + ' – ' + eh + ':' + em;
+      }
+
+      function loadVillageDayPreview() {
+        fetch('/api/events')
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(data) {
+            if (!data || !data.events || data.events.length === 0) {
+              villageDayCard.innerHTML = '<h3>Village Day</h3><p>No upcoming events</p><a href="/village-day.html" class="card-link">Add one →</a>';
+              return;
+            }
+            var events = data.events.slice(0, 3);
+            var html = '<h3>Village Day</h3>';
+            for (var i = 0; i < events.length; i++) {
+              var ev = events[i];
+              html += '<div class="event-mini">' +
+                '<span class="' + eventBadgeClass(ev.event_type) + '">' + escHtml(eventTypeLabel(ev.event_type)) + '</span>' +
+                '<span class="event-mini-title">' + escHtml(ev.title) + '</span>' +
+                '<div class="event-mini-time">' + formatEventTime(ev.start_time, ev.end_time) + '</div>' +
+              '</div>';
+            }
+            html += '<a href="/village-day.html" class="card-link">View all →</a>';
+            villageDayCard.innerHTML = html;
+          })
+          .catch(function() {
+            villageDayCard.innerHTML = '<h3>Village Day</h3><p>Could not load events.</p>';
+          });
+      }
+
       // ---- Auth guard: redirect if not logged in ----
       fetch('/api/me', { credentials: 'same-origin' })
         .then(function (r) {
@@ -1084,6 +1256,7 @@
           headerUser.textContent = user.name;
           welcomeHeading.textContent = 'Welcome, ' + user.name + '!';
           loadFeed();
+          loadVillageDayPreview();
         })
         .catch(function () {
           window.location.href = '/index.html';

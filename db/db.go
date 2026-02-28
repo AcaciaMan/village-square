@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	// SQLite driver — imported for side-effect registration.
 	_ "github.com/mattn/go-sqlite3"
@@ -79,6 +80,32 @@ func migrate(db *sql.DB) error {
 
 	if _, err := db.Exec(postsTable); err != nil {
 		return fmt.Errorf("create posts table: %w", err)
+	}
+
+	const eventsTable = `
+	CREATE TABLE IF NOT EXISTS events (
+		id          INTEGER  PRIMARY KEY AUTOINCREMENT,
+		user_id     INTEGER  NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		title       TEXT     NOT NULL,
+		description TEXT     NOT NULL DEFAULT '',
+		event_type  TEXT     NOT NULL CHECK(event_type IN ('garage_sale', 'sport', 'gathering', 'other')),
+		location    TEXT     NOT NULL DEFAULT '',
+		start_time  DATETIME NOT NULL,
+		end_time    DATETIME,
+		created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	if _, err := db.Exec(eventsTable); err != nil {
+		return fmt.Errorf("create events table: %w", err)
+	}
+
+	// Add event_id column to posts if it doesn't exist yet.
+	_, alterErr := db.Exec("ALTER TABLE posts ADD COLUMN event_id INTEGER REFERENCES events(id) ON DELETE SET NULL")
+	if alterErr != nil {
+		// Ignore "duplicate column name" error — means migration already ran.
+		if !strings.Contains(alterErr.Error(), "duplicate column name") {
+			return fmt.Errorf("add event_id column: %w", alterErr)
+		}
 	}
 
 	return nil
