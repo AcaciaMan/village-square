@@ -4,6 +4,9 @@ A community web app for a rural village — connecting villagers, local producer
 
 Built with **Go** (stdlib only) + **SQLite** + plain **HTML/CSS/JS** — no frameworks, no build step.
 
+Short introduction video:
+https://github.com/user-attachments/assets/cd99a68b-b613-4101-8467-571a12c5924e
+
 ## Quick Start
 
 ```bash
