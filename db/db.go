@@ -65,5 +65,21 @@ func migrate(db *sql.DB) error {
 		return fmt.Errorf("create sessions table: %w", err)
 	}
 
+	// Valid categories: fish, produce, crafts, services, other
+	const postsTable = `
+	CREATE TABLE IF NOT EXISTS posts (
+		id          INTEGER  PRIMARY KEY AUTOINCREMENT,
+		user_id     INTEGER  NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		type        TEXT     NOT NULL CHECK(type IN ('offer', 'request', 'announcement')),
+		title       TEXT     NOT NULL,
+		body        TEXT     NOT NULL DEFAULT '',
+		category    TEXT     NOT NULL DEFAULT 'other',
+		created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	if _, err := db.Exec(postsTable); err != nil {
+		return fmt.Errorf("create posts table: %w", err)
+	}
+
 	return nil
 }

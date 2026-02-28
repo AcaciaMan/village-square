@@ -93,7 +93,7 @@
 
     /* ---- Main content ---- */
     .main {
-      max-width: 800px;
+      max-width: 900px;
       margin: 2rem auto;
       padding: 0 1.5rem;
     }
@@ -114,13 +114,210 @@
       color: #666;
     }
 
-    /* ---- Placeholder cards ---- */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* ---- Layout ---- */
+    .dashboard-layout {
+      display: flex;
+      flex-direction: column;
       gap: 1.25rem;
     }
 
+    /* ---- Feed section ---- */
+    .feed-section {
+      width: 100%;
+    }
+
+    .feed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .feed-header h3 {
+      font-size: 1.2rem;
+      color: #2d6a4f;
+    }
+
+    /* ---- New Post button ---- */
+    .new-post-btn {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #fff;
+      background: #2d6a4f;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .new-post-btn:hover {
+      background: #235a40;
+    }
+
+    /* ---- Filters ---- */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .type-filters {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .type-btn {
+      padding: 0.35rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #fff;
+      color: #2d6a4f;
+      border: 2px solid #2d6a4f;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .type-btn:hover {
+      background: #e8f5e9;
+    }
+
+    .type-btn.active {
+      background: #2d6a4f;
+      color: #fff;
+    }
+
+    .category-select {
+      padding: 0.4rem 0.7rem;
+      font-size: 0.85rem;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .category-select:focus {
+      border-color: #2d6a4f;
+    }
+
+    /* ---- Post cards ---- */
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .post-card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      padding: 1.1rem 1.3rem;
+      text-align: left;
+    }
+
+    .post-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-offer {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-request {
+      background: #cce5ff;
+      color: #004085;
+    }
+
+    .badge-announcement {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .category-tag {
+      display: inline-block;
+      padding: 0.12rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #eee;
+      color: #666;
+      border-radius: 10px;
+      text-transform: capitalize;
+    }
+
+    .post-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 0.3rem;
+      cursor: pointer;
+    }
+
+    .post-title:hover {
+      color: #2d6a4f;
+    }
+
+    .post-meta {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 0.35rem;
+    }
+
+    .post-body-preview {
+      font-size: 0.88rem;
+      color: #555;
+      line-height: 1.45;
+    }
+
+    /* ---- Feed states ---- */
+    .feed-status {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: #999;
+      font-size: 0.95rem;
+    }
+
+    .feed-status .retry-btn {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2d6a4f;
+      background: #fff;
+      border: 2px solid #2d6a4f;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .feed-status .retry-btn:hover {
+      background: #e8f5e9;
+    }
+
+    /* ---- Sidebar / Village Day card ---- */
     .card {
       background: #fff;
       border-radius: 10px;
@@ -140,6 +337,228 @@
       color: #999;
     }
 
+    /* ---- Post detail expanded ---- */
+    .post-card.expanded .post-body-preview {
+      display: none;
+    }
+
+    .post-body-full {
+      display: none;
+      font-size: 0.9rem;
+      color: #444;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      margin-top: 0.4rem;
+    }
+
+    .post-card.expanded .post-body-full {
+      display: block;
+    }
+
+    .post-full-date {
+      display: none;
+      font-size: 0.78rem;
+      color: #aaa;
+      margin-top: 0.3rem;
+    }
+
+    .post-card.expanded .post-full-date {
+      display: block;
+    }
+
+    .collapse-link {
+      display: none;
+      font-size: 0.8rem;
+      color: #2d6a4f;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    .collapse-link:hover {
+      text-decoration: underline;
+    }
+
+    .post-card.expanded .collapse-link {
+      display: inline-block;
+    }
+
+    /* ---- Delete button ---- */
+    .post-delete-btn {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #c0392b;
+      background: none;
+      border: 1.5px solid #e0bfbf;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: all 0.2s;
+    }
+
+    .post-delete-btn:hover {
+      background: #fdecea;
+      border-color: #c0392b;
+    }
+
+    /* ---- Modal overlay ---- */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      animation: modalFadeIn 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      padding: 2rem;
+      width: 92%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      animation: modalSlideIn 0.2s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 0.8rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #999;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .modal-card h3 {
+      font-size: 1.15rem;
+      color: #2d6a4f;
+      margin-bottom: 1.2rem;
+    }
+
+    /* ---- Form fields ---- */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 0.35rem;
+    }
+
+    .form-toggles {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .form-toggle-btn {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      background: #fff;
+      color: #2d6a4f;
+      border: 2px solid #2d6a4f;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .form-toggle-btn:hover {
+      background: #e8f5e9;
+    }
+
+    .form-toggle-btn.active {
+      background: #2d6a4f;
+      color: #fff;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.9rem;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-input:focus {
+      border-color: #2d6a4f;
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 4.5rem;
+    }
+
+    .field-error {
+      font-size: 0.78rem;
+      color: #d32f2f;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    .field-error.visible {
+      display: block;
+    }
+
+    .form-submit-btn {
+      width: 100%;
+      padding: 0.65rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      background: #2d6a4f;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .form-submit-btn:hover {
+      background: #235a40;
+    }
+
+    .form-submit-btn:disabled {
+      background: #a0c4b0;
+      cursor: not-allowed;
+    }
+
     /* ---- Mobile (≤ 500px) ---- */
     @media (max-width: 500px) {
       .header {
@@ -152,8 +571,32 @@
         justify-content: center;
       }
 
-      .cards {
-        grid-template-columns: 1fr;
+      .feed-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+      }
+
+      .new-post-btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .type-filters {
+        justify-content: center;
+      }
+
+      .category-select {
+        width: 100%;
+      }
+
+      .modal-card {
+        padding: 1.4rem;
       }
     }
   </style>
@@ -179,11 +622,37 @@
       <p>This is your village dashboard. More features coming soon.</p>
     </div>
 
-    <div class="cards">
-      <div class="card">
-        <h3>Village Feed</h3>
-        <p>Posts and updates from your neighbours will appear here.</p>
+    <div class="dashboard-layout">
+      <!-- Feed section -->
+      <div class="feed-section">
+        <div class="feed-header">
+          <h3>Village Feed</h3>
+          <button class="new-post-btn" id="newPostBtn">+ New Post</button>
+        </div>
+
+        <div class="filters">
+          <div class="type-filters">
+            <button class="type-btn active" data-type="">All</button>
+            <button class="type-btn" data-type="offer">Offers</button>
+            <button class="type-btn" data-type="request">Requests</button>
+            <button class="type-btn" data-type="announcement">Announcements</button>
+          </div>
+          <select class="category-select" id="categoryFilter">
+            <option value="">All Categories</option>
+            <option value="fish">Fish</option>
+            <option value="produce">Produce</option>
+            <option value="crafts">Crafts</option>
+            <option value="services">Services</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div id="feedContainer">
+          <div class="feed-status">Loading…</div>
+        </div>
       </div>
+
+      <!-- Village Day placeholder card -->
       <div class="card">
         <h3>Village Day</h3>
         <p>Upcoming village events and activities will be listed here.</p>
@@ -191,13 +660,79 @@
     </div>
   </div>
 
+  <!-- New Post modal -->
+  <div class="modal-overlay" id="newPostModal" role="dialog" aria-modal="true" aria-label="Create a new post">
+    <div class="modal-card">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Close">×</button>
+      <h3>Create a New Post</h3>
+      <form id="newPostForm" novalidate>
+        <div class="form-group">
+          <label>Type</label>
+          <div class="form-toggles" id="formTypeToggles">
+            <button type="button" class="form-toggle-btn active" data-type="offer">Offer</button>
+            <button type="button" class="form-toggle-btn" data-type="request">Request</button>
+            <button type="button" class="form-toggle-btn" data-type="announcement">Announcement</button>
+          </div>
+          <div class="field-error" id="errType"></div>
+        </div>
+        <div class="form-group">
+          <label for="formTitle">Title</label>
+          <input type="text" id="formTitle" class="form-input" maxlength="200" placeholder="What are you sharing or looking for?">
+          <div class="field-error" id="errTitle"></div>
+        </div>
+        <div class="form-group">
+          <label for="formCategory">Category</label>
+          <select id="formCategory" class="form-input">
+            <option value="other">Other</option>
+            <option value="fish">Fish</option>
+            <option value="produce">Produce</option>
+            <option value="crafts">Crafts</option>
+            <option value="services">Services</option>
+          </select>
+          <div class="field-error" id="errCategory"></div>
+        </div>
+        <div class="form-group">
+          <label for="formBody">Details <span style="font-weight:400;color:#999">(optional)</span></label>
+          <textarea id="formBody" class="form-input" rows="4" maxlength="2000" placeholder="Add details…"></textarea>
+          <div class="field-error" id="errBody"></div>
+        </div>
+        <button type="submit" class="form-submit-btn" id="formSubmitBtn">Post</button>
+      </form>
+    </div>
+  </div>
+
   <script>
     (function () {
-      var headerUser     = document.getElementById('headerUser');
-      var welcomeHeading = document.getElementById('welcomeHeading');
-      var logoutBtn      = document.getElementById('logoutBtn');
-      var banner         = document.getElementById('banner');
-      var bannerTimer    = null;
+      var headerUser      = document.getElementById('headerUser');
+      var welcomeHeading  = document.getElementById('welcomeHeading');
+      var logoutBtn       = document.getElementById('logoutBtn');
+      var banner          = document.getElementById('banner');
+      var bannerTimer     = null;
+      var feedContainer   = document.getElementById('feedContainer');
+      var categoryFilter  = document.getElementById('categoryFilter');
+      var newPostBtn      = document.getElementById('newPostBtn');
+      var typeBtns        = document.querySelectorAll('.type-btn');
+
+      var currentType     = '';
+      var currentCategory = '';
+
+      // ---- Modal elements ----
+      var modal          = document.getElementById('newPostModal');
+      var modalCloseBtn  = document.getElementById('modalCloseBtn');
+      var newPostForm    = document.getElementById('newPostForm');
+      var formTitle      = document.getElementById('formTitle');
+      var formBody       = document.getElementById('formBody');
+      var formCategory   = document.getElementById('formCategory');
+      var formSubmitBtn  = document.getElementById('formSubmitBtn');
+      var formTypeToggles = document.querySelectorAll('#formTypeToggles .form-toggle-btn');
+      var errType        = document.getElementById('errType');
+      var errTitle       = document.getElementById('errTitle');
+      var errBody        = document.getElementById('errBody');
+      var selectedFormType = 'offer';
+
+      // Track current posts data for detail expand
+      var currentPosts = [];
+      var currentUserID = 0;
 
       // ---- Banner helper ----
       function showBanner(message, type) {
@@ -213,6 +748,327 @@
         }, 4000);
       }
 
+      // ---- Time ago helper ----
+      function timeAgo(dateStr) {
+        var now = Date.now();
+        var then = new Date(dateStr).getTime();
+        var secs = Math.floor((now - then) / 1000);
+        if (secs < 60) return 'just now';
+        var mins = Math.floor(secs / 60);
+        if (mins < 60) return mins + (mins === 1 ? ' minute ago' : ' minutes ago');
+        var hrs = Math.floor(mins / 60);
+        if (hrs < 24) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+        var days = Math.floor(hrs / 24);
+        if (days < 30) return days + (days === 1 ? ' day ago' : ' days ago');
+        var months = Math.floor(days / 30);
+        return months + (months === 1 ? ' month ago' : ' months ago');
+      }
+
+      // ---- Badge class helper ----
+      function badgeClass(type) {
+        if (type === 'offer') return 'badge badge-offer';
+        if (type === 'request') return 'badge badge-request';
+        return 'badge badge-announcement';
+      }
+
+      // ---- Format full date helper ----
+      function formatFullDate(dateStr) {
+        var d = new Date(dateStr);
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        var day = d.getDate();
+        var month = months[d.getMonth()];
+        var year = d.getFullYear();
+        var hrs = String(d.getHours()).padStart(2, '0');
+        var mins = String(d.getMinutes()).padStart(2, '0');
+        return day + ' ' + month + ' ' + year + ', ' + hrs + ':' + mins;
+      }
+
+      // ---- Render single post card HTML ----
+      function postCardHTML(p) {
+        var bodyPreview = p.body || '';
+        if (bodyPreview.length > 120) bodyPreview = bodyPreview.substring(0, 120) + '…';
+
+        var deleteBtn = '';
+        if (currentUserID && p.user_id === currentUserID) {
+          deleteBtn = '<button class="post-delete-btn" data-delete-id="' + p.id + '" title="Delete this post">Delete</button>';
+        }
+
+        return '<div class="post-card" data-post-id="' + p.id + '">' +
+            '<div class="post-card-top">' +
+              '<span class="' + badgeClass(p.type) + '">' + escHtml(p.type) + '</span>' +
+              '<span class="category-tag">' + escHtml(p.category) + '</span>' +
+              deleteBtn +
+            '</div>' +
+            '<div class="post-title" tabindex="0">' + escHtml(p.title) + '</div>' +
+            '<div class="post-meta">' + escHtml(p.author) + ' · ' + timeAgo(p.created_at) + '</div>' +
+            (bodyPreview ? '<div class="post-body-preview">' + escHtml(bodyPreview) + '</div>' : '') +
+            '<div class="post-body-full">' + escHtml(p.body || '') + '</div>' +
+            '<div class="post-full-date">' + formatFullDate(p.created_at) + '</div>' +
+            '<span class="collapse-link" tabindex="0">Collapse</span>' +
+          '</div>';
+      }
+
+      // ---- Render feed ----
+      function renderFeed(posts) {
+        currentPosts = posts || [];
+        if (!posts || posts.length === 0) {
+          feedContainer.innerHTML =
+            '<div class="feed-status">No posts yet — be the first to share something!</div>';
+          return;
+        }
+
+        var html = '<div class="post-list">';
+        for (var i = 0; i < posts.length; i++) {
+          html += postCardHTML(posts[i]);
+        }
+        html += '</div>';
+        feedContainer.innerHTML = html;
+        attachPostCardListeners();
+      }
+
+      // ---- Post detail: expand/collapse ----
+      function attachPostCardListeners() {
+        var titles = feedContainer.querySelectorAll('.post-title');
+        var collapses = feedContainer.querySelectorAll('.collapse-link');
+        var deleteBtns = feedContainer.querySelectorAll('.post-delete-btn');
+        for (var i = 0; i < titles.length; i++) {
+          titles[i].addEventListener('click', toggleExpand);
+          titles[i].addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') toggleExpand.call(this, e);
+          });
+        }
+        for (var i = 0; i < collapses.length; i++) {
+          collapses[i].addEventListener('click', collapseCard);
+          collapses[i].addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') collapseCard.call(this, e);
+          });
+        }
+        for (var i = 0; i < deleteBtns.length; i++) {
+          deleteBtns[i].addEventListener('click', handleDeleteClick);
+        }
+      }
+
+      function toggleExpand(e) {
+        var card = this.closest('.post-card');
+        if (card) card.classList.toggle('expanded');
+      }
+
+      function collapseCard(e) {
+        var card = this.closest('.post-card');
+        if (card) card.classList.remove('expanded');
+      }
+
+      // ---- Delete post ----
+      function handleDeleteClick(e) {
+        var btn = e.currentTarget;
+        var postId = btn.getAttribute('data-delete-id');
+        if (!confirm('Delete this post?')) return;
+
+        btn.disabled = true;
+        fetch('/api/posts/' + postId, {
+          method: 'DELETE',
+          credentials: 'same-origin'
+        })
+        .then(function (r) {
+          if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Delete failed'); });
+          return r.json();
+        })
+        .then(function () {
+          var card = btn.closest('.post-card');
+          if (card) card.remove();
+          currentPosts = currentPosts.filter(function (p) { return String(p.id) !== postId; });
+          if (currentPosts.length === 0) {
+            feedContainer.innerHTML = '<div class="feed-status">No posts yet — be the first to share something!</div>';
+          }
+          showBanner('Post deleted.', 'success');
+        })
+        .catch(function (err) {
+          showBanner(err.message || 'Could not delete post.', 'error');
+          btn.disabled = false;
+        });
+      }
+
+      function escHtml(str) {
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+      }
+
+      // ---- Fetch feed ----
+      function loadFeed() {
+        feedContainer.innerHTML = '<div class="feed-status">Loading…</div>';
+
+        var url = '/api/posts';
+        var params = [];
+        if (currentType) params.push('type=' + encodeURIComponent(currentType));
+        if (currentCategory) params.push('category=' + encodeURIComponent(currentCategory));
+        if (params.length) url += '?' + params.join('&');
+
+        fetch(url)
+          .then(function (r) {
+            if (!r.ok) throw new Error('fetch failed');
+            return r.json();
+          })
+          .then(function (data) {
+            renderFeed(data.posts);
+          })
+          .catch(function () {
+            feedContainer.innerHTML =
+              '<div class="feed-status">' +
+                'Could not load posts. Please try again.' +
+                '<br><button class="retry-btn" id="retryBtn">Retry</button>' +
+              '</div>';
+            document.getElementById('retryBtn').addEventListener('click', loadFeed);
+          });
+      }
+
+      // ---- Filter: type buttons ----
+      for (var i = 0; i < typeBtns.length; i++) {
+        typeBtns[i].addEventListener('click', function () {
+          for (var j = 0; j < typeBtns.length; j++) typeBtns[j].classList.remove('active');
+          this.classList.add('active');
+          currentType = this.getAttribute('data-type');
+          loadFeed();
+        });
+      }
+
+      // ---- Filter: category dropdown ----
+      categoryFilter.addEventListener('change', function () {
+        currentCategory = this.value;
+        loadFeed();
+      });
+
+      // ---- Modal: open / close ----
+      function openModal() {
+        newPostForm.reset();
+        formTitle.value = '';
+        formBody.value = '';
+        formCategory.value = 'other';
+        selectedFormType = 'offer';
+        for (var i = 0; i < formTypeToggles.length; i++) {
+          formTypeToggles[i].classList.toggle('active', formTypeToggles[i].getAttribute('data-type') === 'offer');
+        }
+        clearFieldErrors();
+        formSubmitBtn.disabled = false;
+        modal.classList.add('open');
+        formTitle.focus();
+      }
+
+      function closeModal() {
+        modal.classList.remove('open');
+        newPostBtn.focus();
+      }
+
+      function clearFieldErrors() {
+        errType.textContent = ''; errType.classList.remove('visible');
+        errTitle.textContent = ''; errTitle.classList.remove('visible');
+        errBody.textContent = ''; errBody.classList.remove('visible');
+      }
+
+      function showFieldError(el, msg) {
+        el.textContent = msg;
+        el.classList.add('visible');
+      }
+
+      newPostBtn.addEventListener('click', openModal);
+      modalCloseBtn.addEventListener('click', closeModal);
+
+      // Close on backdrop click
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+      });
+
+      // ---- Modal: focus trap ----
+      modal.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab') return;
+        var focusable = modal.querySelectorAll('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      });
+
+      // ---- Form: type toggles ----
+      for (var t = 0; t < formTypeToggles.length; t++) {
+        formTypeToggles[t].addEventListener('click', function () {
+          for (var k = 0; k < formTypeToggles.length; k++) formTypeToggles[k].classList.remove('active');
+          this.classList.add('active');
+          selectedFormType = this.getAttribute('data-type');
+        });
+      }
+
+      // ---- Form: submit ----
+      newPostForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearFieldErrors();
+
+        var valid = true;
+        var titleVal = formTitle.value.trim();
+        var bodyVal = formBody.value;
+
+        if (!selectedFormType) {
+          showFieldError(errType, 'Please select a type.');
+          valid = false;
+        }
+        if (!titleVal) {
+          showFieldError(errTitle, 'Title is required.');
+          valid = false;
+        } else if (titleVal.length > 200) {
+          showFieldError(errTitle, 'Title must be under 200 characters.');
+          valid = false;
+        }
+        if (bodyVal.length > 2000) {
+          showFieldError(errBody, 'Body must be under 2000 characters.');
+          valid = false;
+        }
+
+        if (!valid) return;
+
+        formSubmitBtn.disabled = true;
+
+        fetch('/api/posts', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: selectedFormType,
+            title: titleVal,
+            body: bodyVal,
+            category: formCategory.value
+          })
+        })
+        .then(function (r) {
+          if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Failed to create post'); });
+          return r.json();
+        })
+        .then(function (post) {
+          closeModal();
+          showBanner('Post published!', 'success');
+          // Prepend new post to feed
+          currentPosts.unshift(post);
+          var listEl = feedContainer.querySelector('.post-list');
+          if (listEl) {
+            listEl.insertAdjacentHTML('afterbegin', postCardHTML(post));
+            attachPostCardListeners();
+          } else {
+            renderFeed(currentPosts);
+          }
+        })
+        .catch(function (err) {
+          showBanner(err.message || 'Could not create post.', 'error');
+          formSubmitBtn.disabled = false;
+        });
+      });
+
       // ---- Auth guard: redirect if not logged in ----
       fetch('/api/me', { credentials: 'same-origin' })
         .then(function (r) {
@@ -224,8 +1080,10 @@
         })
         .then(function (user) {
           if (!user) return;
+          currentUserID = user.id;
           headerUser.textContent = user.name;
           welcomeHeading.textContent = 'Welcome, ' + user.name + '!';
+          loadFeed();
         })
         .catch(function () {
           window.location.href = '/index.html';
