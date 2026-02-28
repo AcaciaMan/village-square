@@ -4,12 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Village Square</title>
-  <!-- Placeholder favicon to suppress 404 in server logs -->
   <link rel="icon" href="data:,">
 
-  <!-- ===== STYLES =====
-       Minimal, mobile-first CSS. Everything is inline so the page
-       works as a single file with no build step. -->
   <style>
     *,
     *::before,
@@ -54,6 +50,31 @@
       margin-bottom: 2rem;
     }
 
+    /* ---- Banner ---- */
+    #banner {
+      display: none;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #banner.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    #banner.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
     /* ---- Form ---- */
     .form-group {
       margin-bottom: 1rem;
@@ -83,7 +104,6 @@
       box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.15);
     }
 
-    /* Per-field error message */
     .field-error {
       font-size: 0.78rem;
       color: #d32f2f;
@@ -109,91 +129,152 @@
       background: #1b4332;
     }
 
-    /* ---- Success message ---- */
-    .success {
-      display: none;            /* shown via JS */
-      margin-top: 1.5rem;
-      padding: 0.75rem 1rem;
-      background: #d4edda;
-      color: #155724;
-      border-radius: 6px;
-      font-size: 0.95rem;
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
+
+    /* ---- Toggle link ---- */
+    .toggle-link {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.88rem;
+      color: #2d6a4f;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      width: auto;
+      padding: 0;
+      font-weight: 400;
+    }
+
+    .toggle-link:hover {
+      color: #1b4332;
+      background: none;
+    }
+
+    /* Hide elements */
+    .hidden { display: none !important; }
   </style>
 </head>
 
 <body>
   <div class="container">
-
-    <!-- ===== HEADER =====
-         App title and one-line description. -->
     <header>
       <h1>Village Square</h1>
       <p class="subtitle">Connecting villagers with trusted local suppliers.</p>
     </header>
 
-    <!-- ===== FORM =====
-         Name + Email login. action/method set for graceful degradation
-         if JavaScript is disabled; JS intercepts submit for now. -->
-    <form id="loginForm" action="/api/register" method="POST" novalidate>
-      <div class="form-group">
+    <!-- Banner for success / error messages -->
+    <div id="banner" aria-live="polite"></div>
+
+    <form id="authForm" novalidate>
+      <!-- Name field (hidden in login mode) -->
+      <div class="form-group" id="nameGroup">
         <label for="name">Name</label>
         <input type="text" id="name" name="name" placeholder="Your name"
-               autocomplete="name" required>
+               autocomplete="name">
         <div class="field-error" id="nameError"></div>
       </div>
 
       <div class="form-group">
         <label for="email">Email</label>
         <input type="email" id="email" name="email" placeholder="you@example.com"
-               autocomplete="email" required>
+               autocomplete="email">
         <div class="field-error" id="emailError"></div>
       </div>
 
-      <button type="submit">Continue</button>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               placeholder="Password (min 6 chars)" autocomplete="current-password">
+        <div class="field-error" id="passwordError"></div>
+      </div>
+
+      <button type="submit" id="submitBtn">Register</button>
     </form>
 
-    <!-- ===== SUCCESS MESSAGE =====
-         Shown after valid submission. aria-live so screen readers
-         announce it automatically. -->
-    <div class="success" id="successMsg" aria-live="polite"></div>
-
+    <button class="toggle-link" id="toggleMode">Already have an account? Log in</button>
   </div>
 
-  <!-- ===== SCRIPT =====
-       Client-side validation + console logging.
-       Replace console.log with fetch('/api/register', ...) later. -->
   <script>
     (function () {
-      var form       = document.getElementById('loginForm');
-      var nameInput  = document.getElementById('name');
-      var emailInput = document.getElementById('email');
-      var nameError  = document.getElementById('nameError');
-      var emailError = document.getElementById('emailError');
-      var successMsg = document.getElementById('successMsg');
+      // ---- Elements ----
+      var form        = document.getElementById('authForm');
+      var nameGroup   = document.getElementById('nameGroup');
+      var nameInput   = document.getElementById('name');
+      var emailInput  = document.getElementById('email');
+      var passInput   = document.getElementById('password');
+      var nameError   = document.getElementById('nameError');
+      var emailError  = document.getElementById('emailError');
+      var passError   = document.getElementById('passwordError');
+      var submitBtn   = document.getElementById('submitBtn');
+      var toggleBtn   = document.getElementById('toggleMode');
+      var banner      = document.getElementById('banner');
 
-      // Simple email pattern — intentionally not over-engineered
-      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      var isRegister  = true;   // true = register mode, false = login mode
+      var bannerTimer = null;
 
+      var emailRegex  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      // ---- Auto-redirect if already logged in ----
+      fetch('/api/me', { credentials: 'same-origin' })
+        .then(function (r) { if (r.ok) window.location.href = '/dashboard.html'; });
+
+      // ---- Banner helper ----
+      function showBanner(message, type) {
+        if (bannerTimer) clearTimeout(bannerTimer);
+        banner.textContent = message;
+        banner.className = type;        // 'success' or 'error'
+        banner.style.display = 'block';
+        banner.style.animation = 'none';
+        // Force reflow to restart animation
+        void banner.offsetWidth;
+        banner.style.animation = '';
+        bannerTimer = setTimeout(function () {
+          banner.style.display = 'none';
+        }, 4000);
+      }
+
+      // ---- Toggle register / login ----
+      toggleBtn.addEventListener('click', function () {
+        isRegister = !isRegister;
+        if (isRegister) {
+          nameGroup.classList.remove('hidden');
+          submitBtn.textContent = 'Register';
+          toggleBtn.textContent = 'Already have an account? Log in';
+        } else {
+          nameGroup.classList.add('hidden');
+          submitBtn.textContent = 'Log in';
+          toggleBtn.textContent = 'Need an account? Register';
+        }
+        // Clear errors
+        nameError.textContent = '';
+        emailError.textContent = '';
+        passError.textContent = '';
+        banner.style.display = 'none';
+      });
+
+      // ---- Form submit ----
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-
-        // Reset state
-        nameError.textContent  = '';
+        nameError.textContent = '';
         emailError.textContent = '';
-        successMsg.style.display = 'none';
+        passError.textContent = '';
 
-        var name  = nameInput.value.trim();
-        var email = emailInput.value.trim();
-        var valid = true;
+        var name     = nameInput.value.trim();
+        var email    = emailInput.value.trim();
+        var password = passInput.value;
+        var valid    = true;
 
-        // -- Validate name --
-        if (!name) {
+        // Validate name (register only)
+        if (isRegister && !name) {
           nameError.textContent = 'Please enter your name.';
           valid = false;
         }
 
-        // -- Validate email --
+        // Validate email
         if (!email) {
           emailError.textContent = 'Please enter your email.';
           valid = false;
@@ -202,15 +283,72 @@
           valid = false;
         }
 
+        // Validate password
+        if (!password) {
+          passError.textContent = 'Please enter a password.';
+          valid = false;
+        } else if (password.length < 6) {
+          passError.textContent = 'Password must be at least 6 characters.';
+          valid = false;
+        }
+
         if (!valid) return;
 
-        // -- Success: log & show message --
-        console.log('Name:', name);
-        console.log('Email:', email);
+        submitBtn.disabled = true;
 
-        successMsg.textContent   = 'Welcome, ' + name + '!';
-        successMsg.style.display = 'block';
+        if (isRegister) {
+          doRegister(name, email, password);
+        } else {
+          doLogin(email, password);
+        }
       });
+
+      // ---- Register then auto-login ----
+      function doRegister(name, email, password) {
+        fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ name: name, email: email, password: password })
+        })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; }); })
+        .then(function (res) {
+          if (!res.ok) {
+            showBanner(res.data.error || 'Registration failed.', 'error');
+            submitBtn.disabled = false;
+            return;
+          }
+          // Auto-login after successful registration
+          doLogin(email, password);
+        })
+        .catch(function () {
+          showBanner('Network error. Please try again.', 'error');
+          submitBtn.disabled = false;
+        });
+      }
+
+      // ---- Login ----
+      function doLogin(email, password) {
+        fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ email: email, password: password })
+        })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; }); })
+        .then(function (res) {
+          if (!res.ok) {
+            showBanner(res.data.error || 'Login failed.', 'error');
+            submitBtn.disabled = false;
+            return;
+          }
+          window.location.href = '/dashboard.html';
+        })
+        .catch(function () {
+          showBanner('Network error. Please try again.', 'error');
+          submitBtn.disabled = false;
+        });
+      }
     })();
   </script>
 </body>

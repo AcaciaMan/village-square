@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard — Village Square</title>
+  <link rel="icon" href="data:,">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
+      background: #f5f5f0;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* ---- Header bar ---- */
+    .header {
+      background: #2d6a4f;
+      color: #fff;
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-user {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .logout-btn {
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2d6a4f;
+      background: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #e0e0d8;
+    }
+
+    /* ---- Banner ---- */
+    #banner {
+      display: none;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    #banner.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    #banner.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .welcome {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .welcome h2 {
+      font-size: clamp(1.4rem, 4vw, 1.8rem);
+      color: #2d6a4f;
+      margin-bottom: 0.4rem;
+    }
+
+    .welcome p {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    /* ---- Placeholder cards ---- */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      color: #2d6a4f;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: #999;
+    }
+
+    /* ---- Mobile (≤ 500px) ---- */
+    @media (max-width: 500px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .header-right {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header bar -->
+  <div class="header">
+    <span class="header-title">Village Square</span>
+    <div class="header-right">
+      <span class="header-user" id="headerUser"></span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- Banner for messages -->
+  <div id="banner" aria-live="polite"></div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="welcome">
+      <h2 id="welcomeHeading">Welcome!</h2>
+      <p>This is your village dashboard. More features coming soon.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Village Feed</h3>
+        <p>Posts and updates from your neighbours will appear here.</p>
+      </div>
+      <div class="card">
+        <h3>Village Day</h3>
+        <p>Upcoming village events and activities will be listed here.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var headerUser     = document.getElementById('headerUser');
+      var welcomeHeading = document.getElementById('welcomeHeading');
+      var logoutBtn      = document.getElementById('logoutBtn');
+      var banner         = document.getElementById('banner');
+      var bannerTimer    = null;
+
+      // ---- Banner helper ----
+      function showBanner(message, type) {
+        if (bannerTimer) clearTimeout(bannerTimer);
+        banner.textContent = message;
+        banner.className = type;
+        banner.style.display = 'block';
+        banner.style.animation = 'none';
+        void banner.offsetWidth;
+        banner.style.animation = '';
+        bannerTimer = setTimeout(function () {
+          banner.style.display = 'none';
+        }, 4000);
+      }
+
+      // ---- Auth guard: redirect if not logged in ----
+      fetch('/api/me', { credentials: 'same-origin' })
+        .then(function (r) {
+          if (!r.ok) {
+            window.location.href = '/index.html';
+            return null;
+          }
+          return r.json();
+        })
+        .then(function (user) {
+          if (!user) return;
+          headerUser.textContent = user.name;
+          welcomeHeading.textContent = 'Welcome, ' + user.name + '!';
+        })
+        .catch(function () {
+          window.location.href = '/index.html';
+        });
+
+      // ---- Logout ----
+      logoutBtn.addEventListener('click', function () {
+        logoutBtn.disabled = true;
+        fetch('/api/logout', {
+          method: 'POST',
+          credentials: 'same-origin'
+        })
+        .then(function () {
+          window.location.href = '/index.html';
+        })
+        .catch(function () {
+          showBanner('Logout failed. Please try again.', 'error');
+          logoutBtn.disabled = false;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
