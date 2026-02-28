@@ -61,6 +61,13 @@ go build -o village-square.exe .
 - Custom 404 page (HTML for browsers, JSON for API)
 - Automatic expired-session cleanup (hourly)
 
+### Phase 5 — "I'm Interested" & Contact
+- **Contact button** — logged-in users can click "📧 Contact" on any offer or request to open a pre-filled `mailto:` to the post author (author email kept private behind an authenticated endpoint)
+- **Interest tracking** — `interests` table with unique-per-user constraint; toggle interest on/off via `POST /api/posts/{id}/interest`
+- **Interest toggle button** — "🤍 I'm interested" (offers) / "🤍 I can help!" (requests) toggles to "❤ Interested" with a live count badge
+- **Author view** — post authors see a read-only "❤ N interested" label on their own posts
+- Interest count and per-user state included in all post API responses (`interest_count`, `user_interested`)
+
 ## API Endpoints
 
 | Method | Path | Auth | Description |
@@ -74,6 +81,8 @@ go build -o village-square.exe .
 | `GET` | `/api/posts/{id}` | No | Single post detail |
 | `POST` | `/api/posts` | Yes | Create a post |
 | `DELETE` | `/api/posts/{id}` | Yes | Delete own post |
+| `GET` | `/api/posts/{id}/contact` | Yes | Get mailto link for post author |
+| `POST` | `/api/posts/{id}/interest` | Yes | Toggle interest on a post |
 | `GET` | `/api/events` | No | List events (`?type=`) |
 | `GET` | `/api/events/{id}` | No | Single event detail |
 | `POST` | `/api/events` | Yes | Create an event |
@@ -89,6 +98,7 @@ village-square/
 │   ├── users.go             # User queries
 │   ├── sessions.go          # Session CRUD + cleanup
 │   ├── posts.go             # Post CRUD + filters
+│   ├── interests.go         # Interest CRUD (toggle, count, check)
 │   ├── events.go            # Event CRUD + filters
 │   └── seed.go              # Demo data (--seed flag)
 ├── handlers/
@@ -97,6 +107,8 @@ village-square/
 │   ├── logout.go            # POST /api/logout
 │   ├── me.go                # GET /api/me
 │   ├── posts.go             # Post endpoints
+│   ├── contact.go           # GET /api/posts/{id}/contact
+│   ├── interest.go          # POST /api/posts/{id}/interest
 │   ├── events.go            # Event endpoints
 │   ├── health.go            # GET /api/health
 │   └── response.go          # writeJSON / writeError helpers
