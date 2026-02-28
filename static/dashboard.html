@@ -357,6 +357,34 @@
       border-color: #c0392b;
     }
 
+    /* ---- Contact button ---- */
+    .contact-btn {
+      display: none;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #2d6a4f;
+      background: none;
+      border: 2px solid #2d6a4f;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 0.6rem;
+      transition: all 0.2s;
+    }
+
+    .contact-btn:hover {
+      background: #e8f5e9;
+    }
+
+    .contact-btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .post-card.expanded .contact-btn {
+      display: inline-block;
+    }
+
     /* ---- Form toggle buttons ---- */
     .form-toggles {
       display: flex;
@@ -616,6 +644,9 @@
             (p.event_title ? '<a class="event-link-badge" href="/village-day.html">📅 ' + VS.escapeHTML(p.event_title) + '</a>' : '') +
             (bodyPreview ? '<div class="post-body-preview">' + VS.escapeHTML(bodyPreview) + '</div>' : '') +
             '<div class="post-body-full">' + VS.escapeHTML(p.body || '') + '</div>' +
+            (p.type !== 'announcement' && currentUserID && p.user_id !== currentUserID
+              ? '<button class="contact-btn" data-contact-id="' + p.id + '">' + (p.type === 'offer' ? "I\u2019m interested" : 'I can help!') + '</button>'
+              : '') +
             '<div class="post-full-date">' + formatFullDate(p.created_at) + '</div>' +
             '<span class="collapse-link" tabindex="0">Collapse</span>' +
           '</div>';
@@ -678,6 +709,10 @@
         for (var i = 0; i < deleteBtns.length; i++) {
           deleteBtns[i].addEventListener('click', handleDeleteClick);
         }
+        var contactBtns = feedContainer.querySelectorAll('.contact-btn');
+        for (var i = 0; i < contactBtns.length; i++) {
+          contactBtns[i].addEventListener('click', handleContactClick);
+        }
       }
 
       function toggleExpand(e) {
@@ -688,6 +723,33 @@
       function collapseCard(e) {
         var card = this.closest('.post-card');
         if (card) card.classList.remove('expanded');
+      }
+
+      // ---- Contact post author ----
+      function handleContactClick(e) {
+        var btn = e.currentTarget;
+        var postId = btn.getAttribute('data-contact-id');
+        var originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Opening\u2026';
+        fetch('/api/posts/' + postId + '/contact', { credentials: 'same-origin' })
+          .then(function (r) {
+            if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Could not get contact info.'); });
+            return r.json();
+          })
+          .then(function (data) {
+            window.location.href = data.mailto;
+            VS.toast('Opening your email client\u2026', 'success');
+            setTimeout(function () {
+              btn.disabled = false;
+              btn.textContent = originalText;
+            }, 500);
+          })
+          .catch(function (err) {
+            VS.toast(err.message || 'Could not get contact info.', 'error');
+            btn.disabled = false;
+            btn.textContent = originalText;
+          });
       }
 
       // ---- Delete post ----
